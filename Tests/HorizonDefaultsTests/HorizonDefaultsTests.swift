@@ -2,14 +2,15 @@ import XCTest
 @testable import HorizonDefaults
 
 final class HorizonDefaultsTests: XCTestCase {
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-        XCTAssertEqual(HorizonDefaults().text, "Hello, World!")
+    
+    @available(iOS 10.0, *)
+    func testLoggingVariable() {
+        HorizonDefaults.standard.verboseLogging = true
+        XCTAssertEqual(HorizonDefaults.standard.verboseLogging, true)
     }
 
+    @available(iOS 10.0, *)
     static var allTests = [
-        ("testExample", testExample),
+        ("testLogging", testLoggingVariable),
     ]
 }
