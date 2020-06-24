@@ -17,6 +17,14 @@ public class HorizonDefaults: NSObject {
     /// Generic default syncronization object
     public static let standard: HorizonDefaults = HorizonDefaults()
     
+    /// Acceptable keys to sync across iCloud.
+    /// 
+    /// This is useful if you find your app synchronizing system defaults such
+    /// as WebKit defaults or macOS display information.
+    ///
+    /// If no value is set (default), *all* keys will be synced.
+    public var acceptableKeys: [String]?
+    
     private let backgroundQueue = DispatchQueue.init(label: "horizonDefaultsQueue", qos: .background, attributes: .concurrent, autoreleaseFrequency: .workItem, target: .global())
     
     /// Start synchronizing user defaults to and from iCloud
@@ -38,11 +46,18 @@ public class HorizonDefaults: NSObject {
         standard.backgroundQueue.async {
             NotificationCenter.default.removeObserver(self, name: UserDefaults.didChangeNotification, object: nil);
             
-            let iCloudDictionary = NSUbiquitousKeyValueStore.default.dictionaryRepresentation
             let userDefaults = UserDefaults.standard
             
-            for (key, obj) in iCloudDictionary {
-                userDefaults.set(obj, forKey: key as String)
+            if let keysToSync = HorizonDefaults.standard.acceptableKeys, keysToSync.count > 0 {
+                for key in keysToSync {
+                    userDefaults.set(NSUbiquitousKeyValueStore.default.object(forKey: key), forKey: key)
+                }
+            } else {
+                let iCloudDictionary = NSUbiquitousKeyValueStore.default.dictionaryRepresentation
+                
+                for (key, obj) in iCloudDictionary {
+                    userDefaults.set(obj, forKey: key as String)
+                }
             }
             
             userDefaults.synchronize()
@@ -61,8 +76,14 @@ public class HorizonDefaults: NSObject {
             let defaultsDictionary = UserDefaults.standard.dictionaryRepresentation()
             let cloudStore = NSUbiquitousKeyValueStore.default
             
-            for (key, obj) in defaultsDictionary {
-                cloudStore.set(obj, forKey: key as String)
+            if let keysToSync = HorizonDefaults.standard.acceptableKeys, keysToSync.count > 0 {
+                for key in keysToSync {
+                    cloudStore.set(UserDefaults.standard.object(forKey: key), forKey: key)
+                }
+            } else {
+                for (key, obj) in defaultsDictionary {
+                    cloudStore.set(obj, forKey: key as String)
+                }
             }
             
             // let iCloud know that new or updated keys, values are ready to be uploaded
