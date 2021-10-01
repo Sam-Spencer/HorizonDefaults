@@ -7,7 +7,7 @@ import UIKit
 
 /// Synchronize User Defaults to iCloud automatically
 /// Call `start()` on app launch to begin the process
-@available(iOS 10.0, *)
+@available(iOS 10.0, tvOS 10.0, macOS 11.0, *)
 public class HorizonDefaults: NSObject {
    
     /// Set to `true` to enable debug statements printed to the console
